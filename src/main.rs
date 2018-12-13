@@ -1,5 +1,6 @@
 use log::debug;
 use clap::{App, Arg, value_t};
+use std::process::Command;
 
 fn main() -> Result<(), failure::Error> {
     env_logger::init();
@@ -31,6 +32,22 @@ fn main() -> Result<(), failure::Error> {
 //    2018-12-13T11:27:45Z DEBUG ferris_watch] ferris_watch starting...
 //        [2018-12-13T11:27:45Z DEBUG ferris_watch] command = ["ls", "-a"]
 //    [2018-12-13T11:27:45Z DEBUG ferris_watch] interval = 0.5
+
+    let output = Command::new(command[0]).args(&command[1..]).output()?; debug!("output = {:?}", output);
+    let output = String::from_utf8_lossy(&output.stdout);
+    println!("{}", output);
+    // 20202032n [master] ~/repo/rust/handson4/ferris_watch/ %
+    /*
+.
+..
+.git
+.gitignore
+.idea
+Cargo.lock
+Cargo.toml
+src
+target
+    */
 
     Ok(())
 }
