@@ -13,6 +13,13 @@ fn main() -> Result<(), failure::Error> {
                 .multiple(true)
                 .help("The command to run periodically"),
         )
+        .arg(
+            Arg::with_name("interval")
+                .long("interval")
+                .short("n")
+                .takes_value(true) .default_value("2.0")
+                .help("The period to run a command"),
+        )
         .get_matches();
 
     Ok(())
