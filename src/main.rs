@@ -3,6 +3,8 @@ use clap::{App, Arg, value_t};
 use std::process::Command;
 use std::thread::sleep;
 use std::time::Duration;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 fn main() -> Result<(), failure::Error> {
     env_logger::init();
@@ -20,13 +22,14 @@ fn main() -> Result<(), failure::Error> {
             Arg::with_name("interval")
                 .long("interval")
                 .short("n")
-                .takes_value(true) .default_value("2.0")
+                .takes_value(true).default_value("2.0")
                 .help("The period to run a command"),
         )
         .get_matches();
 
     let command =
-        matches.values_of("command").unwrap().collect::<Vec<_>>(); let interval = value_t!(matches, "interval", f64)?;
+        matches.values_of("command").unwrap().collect::<Vec<_>>();
+    let interval = value_t!(matches, "interval", f64)?;
     debug!("command = {:?}", command);
     debug!("interval = {:?}", interval);
 
@@ -35,7 +38,8 @@ fn main() -> Result<(), failure::Error> {
 //        [2018-12-13T11:27:45Z DEBUG ferris_watch] command = ["ls", "-a"]
 //    [2018-12-13T11:27:45Z DEBUG ferris_watch] interval = 0.5
 
-    let output = Command::new(command[0]).args(&command[1..]).output()?; debug!("output = {:?}", output);
+    let output = Command::new(command[0]).args(&command[1..]).output()?;
+    debug!("output = {:?}", output);
     let output = String::from_utf8_lossy(&output.stdout);
     println!("{}", output);
     // 20202032n [master] ~/repo/rust/handson4/ferris_watch/ %
@@ -56,9 +60,26 @@ target
 //        sleep(Duration::from_millis(100));
 //    }
 
-    loop {
-// ... コマンドを実行する処理 ... // ... 休眠する処理 ...
+//    loop {
+//// ... コマンドを実行する処理 ... // ... 休眠する処理 ...
+//    }
+
+    let interrupted = Arc::new(AtomicBool::new(false));
+    signal_hook::flag::register(
+        signal_hook::SIGINT, interrupted.clone())?;
+    let interrupted = || interrupted.load(Ordering::SeqCst);
+
+    'outer: loop {
+//        for  {
+// ...休眠処理...
+        if interrupted() {
+            println!("interrupted");
+            break 'outer;
+        }
+//        }
     }
+
+    debug!("end");
 
     Ok(())
 }
