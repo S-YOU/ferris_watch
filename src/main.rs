@@ -51,9 +51,13 @@ src
 target
     */
 
-    let interval10 = (interval * 10.0) as u32;
-    for _ in 0..interval10 {
-        sleep(Duration::from_millis(100));
+//    let interval10 = (interval * 10.0) as u32;
+//    for _ in 0..interval10 {
+//        sleep(Duration::from_millis(100));
+//    }
+
+    loop {
+// ... コマンドを実行する処理 ... // ... 休眠する処理 ...
     }
 
     Ok(())
