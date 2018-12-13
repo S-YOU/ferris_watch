@@ -1,5 +1,5 @@
 use log::debug;
-use clap::{App, Arg};
+use clap::{App, Arg, value_t};
 
 fn main() -> Result<(), failure::Error> {
     env_logger::init();
@@ -21,6 +21,16 @@ fn main() -> Result<(), failure::Error> {
                 .help("The period to run a command"),
         )
         .get_matches();
+
+    let command =
+        matches.values_of("command").unwrap().collect::<Vec<_>>(); let interval = value_t!(matches, "interval", f64)?;
+    debug!("command = {:?}", command);
+    debug!("interval = {:?}", interval);
+
+    // RUST_LOG=ferris_watch=debug cargo run -- -n 0.5 -- ls -a
+//    2018-12-13T11:27:45Z DEBUG ferris_watch] ferris_watch starting...
+//        [2018-12-13T11:27:45Z DEBUG ferris_watch] command = ["ls", "-a"]
+//    [2018-12-13T11:27:45Z DEBUG ferris_watch] interval = 0.5
 
     Ok(())
 }
