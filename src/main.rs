@@ -1,6 +1,8 @@
 use log::debug;
 use clap::{App, Arg, value_t};
 use std::process::Command;
+use std::thread::sleep;
+use std::time::Duration;
 
 fn main() -> Result<(), failure::Error> {
     env_logger::init();
@@ -48,6 +50,11 @@ Cargo.toml
 src
 target
     */
+
+    let interval10 = (interval * 10.0) as u32;
+    for _ in 0..interval10 {
+        sleep(Duration::from_millis(100));
+    }
 
     Ok(())
 }
