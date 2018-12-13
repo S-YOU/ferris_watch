@@ -38,10 +38,14 @@ fn main() -> Result<(), failure::Error> {
 //        [2018-12-13T11:27:45Z DEBUG ferris_watch] command = ["ls", "-a"]
 //    [2018-12-13T11:27:45Z DEBUG ferris_watch] interval = 0.5
 
-    let output = Command::new(command[0]).args(&command[1..]).output()?;
-    debug!("output = {:?}", output);
-    let output = String::from_utf8_lossy(&output.stdout);
-    println!("{}", output);
+    // pancurses
+    let window = pancurses::initscr();
+    struct EndWin;
+    impl Drop for EndWin {
+        fn drop(&mut self) { pancurses::endwin();
+        } }
+    let _endwin = EndWin;
+
     // 20202032n [master] ~/repo/rust/handson4/ferris_watch/ %
     /*
 .
@@ -55,14 +59,10 @@ src
 target
     */
 
-//    let interval10 = (interval * 10.0) as u32;
-//    for _ in 0..interval10 {
-//        sleep(Duration::from_millis(100));
-//    }
-
 //    loop {
 //// ... コマンドを実行する処理 ... // ... 休眠する処理 ...
 //    }
+
 
     let interrupted = Arc::new(AtomicBool::new(false));
     signal_hook::flag::register(
@@ -76,8 +76,24 @@ target
             println!("interrupted");
             break 'outer;
         }
+
+        let output = Command::new(command[0]).args(&command[1..]).output()?;
+        debug!("output = {:?}", output);
+        let output = String::from_utf8_lossy(&output.stdout);
+        // println!("{}", output);
+        window.clear();
+        window.printw(output);
+        window.refresh();
+
+        let interval10 = (interval * 10.0) as u32;
+        for _ in 0..interval10 {
+            sleep(Duration::from_millis(100));
+        }
+
 //        }
     }
+
+    // RUST_LOG=ferris_watch=debug cargo run -- -n 1 -- date
 
     debug!("end");
 
